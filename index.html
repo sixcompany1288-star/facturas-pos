@@ -2,65 +2,73 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ticket</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=60mm, initial-scale=1.0">
+<title>Ticket de Compra</title>
 
 <style>
-body{
-    font-family: 'Courier New', monospace;
-    width:58mm;
-    margin:auto;
-    padding:8px;
-    background:white;
-    color:black;
-    font-size:12px;
+body {
+    font-family: tahoma, Helvetica, sans-serif;
+    margin: 0;
+    font-size: 3mm;
+    text-align: center;
 }
 
-.logo{
-    text-align:center;
+#thermal-pos {
+    max-width: 60mm;
+    margin: 0 auto;
 }
 
-.logo img{
-    width:80px;
-    filter: grayscale(100%);
+.label {
+    margin: 0;
+    margin-left: 0.5mm;
 }
 
-h1,h2,p{
-    margin:2px 0;
+.table {
+    border-collapse: collapse;
+    width: 100%;
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
+.table-header h2 {
+    margin: 0;
+    font-size: 4mm;
 }
 
-th,td{
-    padding:2px 0;
-    font-size:11px;
+.table-footer td {
+    padding: 0;
+    line-height: 1;
 }
 
-.right{
-    text-align:right;
+.table-footer h2 {
+    margin: 0;
+    padding: 1mm 0;
 }
 
-.center{
-    text-align:center;
+.nro_boleta,
+.nro_mesa,
+.fecha_recepcion,
+.info-tienda,
+.m-0,
+.direccion {
+    margin: 0;
 }
 
-hr{
-    border:none;
-    border-top:1px dashed black;
+.saldo-text {
+    margin: 0;
 }
 
-button{
-    width:100%;
-    padding:10px;
-    margin-top:10px;
+.policy {
+    margin-left: 0.5mm;
 }
 
-@media print{
-    button{
-        display:none;
+.logo {
+    width: 70%;
+    margin-bottom: 2mm;
+}
+
+@media print {
+    body {
+        width: 60mm;
     }
 }
 </style>
@@ -68,115 +76,156 @@ button{
 
 <body>
 
-<div class="logo">
-    <img src="logo.svg">
-</div>
-
-<h2 class="center">Mister Phone</h2>
-<p class="center">Domicilios 3044430427</p>
-<p class="center">Mistares Etapa 2</p>
-
-<hr>
-
-<p id="venta"></p>
-<p id="cliente"></p>
-<p id="fecha"></p>
-
-<hr>
-
-<table>
-    <thead>
-        <tr>
-            <th>Cant</th>
-            <th>Descripción</th>
-            <th class="right">Total</th>
-        </tr>
-    </thead>
-    <tbody id="items"></tbody>
-</table>
-
-<hr>
-
-<table>
-<tr>
-<td>Subtotal</td>
-<td class="right" id="subtotal"></td>
-</tr>
-
-<tr>
-<td>Descuento</td>
-<td class="right" id="descuento"></td>
-</tr>
-
-<tr>
-<td>Total</td>
-<td class="right" id="total"></td>
-</tr>
-
-<tr>
-<td>Recibido</td>
-<td class="right" id="recibido"></td>
-</tr>
-
-<tr>
-<td>Devuelta</td>
-<td class="right" id="devuelta"></td>
-</tr>
-</table>
-
-<hr>
-
-<p class="center">Gracias por su compra</p>
-<p class="center">Facturas AutoSystem</p>
-
-<button onclick="window.print()">Imprimir</button>
-
 <script>
-
 const params = new URLSearchParams(window.location.search);
 
-document.getElementById("venta").innerText =
-"Venta: " + params.get("idVenta");
-
-document.getElementById("cliente").innerText =
-"Cliente: " + params.get("cliente");
-
-document.getElementById("fecha").innerText =
-"Fecha: " + params.get("fecha");
-
-document.getElementById("subtotal").innerText =
-params.get("subtotal");
-
-document.getElementById("descuento").innerText =
-params.get("descuento");
-
-document.getElementById("total").innerText =
-params.get("total");
-
-document.getElementById("recibido").innerText =
-params.get("recibido");
-
-document.getElementById("devuelta").innerText =
-params.get("devuelta");
-
-const productos = params.get("productos").split(",");
-const cantidades = params.get("cantidades").split(",");
-const precios = params.get("precios").split(",");
-
-let filas = "";
-
-for(let i=0;i<productos.length;i++){
-    filas += `
-    <tr>
-        <td>${cantidades[i]}</td>
-        <td>${productos[i]}</td>
-        <td class="right">${precios[i]}</td>
-    </tr>`;
+function getValue(key, def = "") {
+    return params.has(key) ? decodeURIComponent(params.get(key)) : def;
 }
 
-document.getElementById("items").innerHTML = filas;
+function formatNumber(value) {
+    const num = parseFloat(value || 0);
+    return isNaN(num) ? "0" : num.toLocaleString('es-CO');
+}
 
+const nro_boleta = getValue('boleta', "---");
+const nro_mesa = getValue('mesa', "---");
+const direc = getValue('direccion', "---");
+const fecha = getValue('fecha', "dd/mm/aaaa");
+const hora = getValue('fecha_entrega', "00:00:00");
+
+const total = formatNumber(getValue('total', 0));
+const efectivo = formatNumber(getValue('descuento', 0));
+const devueltas = formatNumber(getValue('subtotal_desc', 0));
+const estado = getValue('estado', "--");
+
+let cantidades = getValue('cantidades', "0").split(",");
+let descripciones = getValue('servicios', "Sin artículos").split(",");
+let precios = getValue('p_unit', "0").split(",");
+
+let result = cantidades.map((c, i) => ({
+    cantidad: c,
+    descripcion: descripciones[i] || "",
+    precio_unit: formatNumber(precios[i])
+}));
+
+window.onload = function () {
+    renderTicket();
+
+    setTimeout(() => {
+        window.print();
+
+        window.onafterprint = function () {
+            window.close();
+        };
+    }, 500);
+};
+
+function renderTicket() {
+    document.getElementById("nro_boleta_id").textContent = nro_boleta;
+    document.getElementById("nro_mesa_id").textContent = nro_mesa;
+    document.getElementById("nro_direccion_id").textContent = direc;
+    document.getElementById("fechaR").textContent = fecha;
+    document.getElementById("hora").textContent = hora;
+    document.getElementById("total").textContent = total;
+    document.getElementById("efectivo").textContent = efectivo;
+    document.getElementById("devueltas").textContent = devueltas;
+    document.getElementById("estado").textContent = estado;
+
+    const tablaBody = document.getElementById("tablaBody");
+
+    result.forEach(row => {
+        if (row.descripcion.trim() !== "") {
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = `
+                <td>${row.cantidad}</td>
+                <td>${row.descripcion}</td>
+                <td>${row.precio_unit}</td>
+            `;
+            tablaBody.appendChild(newRow);
+        }
+    });
+}
 </script>
+
+<div id="thermal-pos">
+
+<div class="label">
+
+<img src="logo.svg" class="logo" alt="Logo">
+
+<p class="info-tienda">
+Nit:
+<br>
+Domicilios 304 4430427
+<br>
+Mistares Etapa 2 Frente Bourboun
+</p>
+</div>
+
+<div class="label">
+<b>TICKET:</b>
+<h1 id="nro_boleta_id">---</h1>
+<h1 id="nro_mesa_id"></h1>
+<h3 id="nro_direccion_id"></h3>
+</div>
+
+<div class="label">
+<p class="fecha_recepcion">
+FECHA DE RECEPCIÓN:
+<br>
+<b id="fechaR"></b>
+<b id="hora"></b>
+</p>
+</div>
+
+<table class="table">
+<thead>
+<tr class="table-header">
+<th>Cant</th>
+<th>Descripción</th>
+<th>Total</th>
+</tr>
+</thead>
+
+<tbody id="tablaBody"></tbody>
+
+<tfoot>
+<tr class="table-footer">
+<td colspan="2"><h2>EFECTIVO:</h2></td>
+<td><h2 id="efectivo">0</h2></td>
+</tr>
+
+<tr class="table-footer">
+<td colspan="2"><h2>TOTAL:</h2></td>
+<td><h2 id="total">0</h2></td>
+</tr>
+
+<tr class="table-footer">
+<td colspan="2"><h2>DEVUELTAS:</h2></td>
+<td><h2 id="devueltas">0</h2></td>
+</tr>
+</tfoot>
+</table>
+
+<br>
+
+<p class="saldo-text">
+<b><span id="estado">--</span></b>
+</p>
+
+<div class="policy">
+<p><b>IMPORTANTE:</b></p>
+<p class="m-0">
+Facturas AutoSystem
+<br>
+Contacto: +57 315 820 8619
+<br>
+Síguenos como @AutoSystem
+</p>
+</div>
+
+</div>
 
 </body>
 </html>
