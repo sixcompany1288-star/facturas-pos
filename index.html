@@ -108,6 +108,7 @@ const hora = getValue('horaVenta', "00:00");
 
 const anio = fecha.split("/")[2] || new Date().getFullYear();
 const ticketCompleto = `${idCobro} - ${anio}`;
+const cliente = getValue('clienteID', "NA");
 
 const totalVenta = formatNumber(getValue('totalVenta', 0));
 const efectivo = formatNumber(getValue('dineroRecibido', 0));
@@ -134,6 +135,7 @@ window.onload = function () {
 
 function renderTicket() {
     document.getElementById("ticket_id").textContent = ticketCompleto;
+    document.getElementById("clienteID").textContent = cliente;
     document.getElementById("fechaR").textContent = fecha;
     document.getElementById("hora").textContent = hora;
     document.getElementById("totalVenta").textContent = totalVenta;
@@ -179,6 +181,7 @@ Guastatoya El progreso, Guatemala
 <div class="label">
 <b>VENTA:</b>
 <h1 id="ticket_id">---</h1>
+<h2 id="clienteID">---</h2>
 </div>
 
 <div class="label">
