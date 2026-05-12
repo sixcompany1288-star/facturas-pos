@@ -29,6 +29,10 @@ body {
     width: 100%;
 }
 
+.table th, .table td {
+    padding: 1mm;
+}
+
 .table-header h2 {
     margin: 0;
     font-size: 4mm;
@@ -42,28 +46,30 @@ body {
 .table-footer h2 {
     margin: 0;
     padding: 1mm 0;
+    font-size: 3.8mm;
 }
 
-.nro_boleta,
-.nro_mesa,
-.fecha_recepcion,
-.info-tienda,
-.m-0,
-.direccion {
-    margin: 0;
+.logo {
+    width: 70%;
+    margin-bottom: 2mm;
 }
 
 .saldo-text {
-    margin: 0;
+    margin: 3mm 0;
+    font-size: 4mm;
 }
 
 .policy {
     margin-left: 0.5mm;
 }
 
-.logo {
-    width: 70%;
-    margin-bottom: 2mm;
+.m-0 {
+    margin: 0;
+}
+
+.garantia {
+    margin-top: 2mm;
+    font-size: 2.8mm;
 }
 
 @media print {
@@ -88,25 +94,27 @@ function formatNumber(value) {
     return isNaN(num) ? "0" : num.toLocaleString('es-CO');
 }
 
-const nro_boleta = getValue('boleta', "---");
-const nro_mesa = getValue('mesa', "---");
-const direc = getValue('direccion', "---");
-const fecha = getValue('fecha', "dd/mm/aaaa");
-const hora = getValue('fecha_entrega', "00:00:00");
+/* DATOS DEL POS */
+const idCobro = getValue('idCobro', "---");
+const fecha = getValue('fechaVenta', "dd/mm/aaaa");
+const hora = getValue('horaVenta', "00:00");
 
-const total = formatNumber(getValue('total', 0));
-const efectivo = formatNumber(getValue('descuento', 0));
-const devueltas = formatNumber(getValue('subtotal_desc', 0));
-const estado = getValue('estado', "--");
+const anio = fecha.split("/")[2] || new Date().getFullYear();
+const ticketCompleto = `${idCobro} - ${anio}`;
+
+const totalVenta = formatNumber(getValue('totalVenta', 0));
+const efectivo = formatNumber(getValue('dineroRecibido', 0));
+const devuelta = formatNumber(getValue('devuelta', 0));
+const estado = getValue('estado', "PAGADO");
 
 let cantidades = getValue('cantidades', "0").split(",");
-let descripciones = getValue('servicios', "Sin artículos").split(",");
-let precios = getValue('p_unit', "0").split(",");
+let productos = getValue('nombreProducto', "Sin artículos").split(",");
+let totales = getValue('totales', "0").split(",");
 
 let result = cantidades.map((c, i) => ({
     cantidad: c,
-    descripcion: descripciones[i] || "",
-    precio_unit: formatNumber(precios[i])
+    descripcion: productos[i] || "",
+    total: formatNumber(totales[i])
 }));
 
 window.onload = function () {
@@ -114,7 +122,6 @@ window.onload = function () {
 
     setTimeout(() => {
         window.print();
-
         window.onafterprint = function () {
             window.close();
         };
@@ -122,14 +129,12 @@ window.onload = function () {
 };
 
 function renderTicket() {
-    document.getElementById("nro_boleta_id").textContent = nro_boleta;
-    document.getElementById("nro_mesa_id").textContent = nro_mesa;
-    document.getElementById("nro_direccion_id").textContent = direc;
+    document.getElementById("ticket_id").textContent = ticketCompleto;
     document.getElementById("fechaR").textContent = fecha;
     document.getElementById("hora").textContent = hora;
-    document.getElementById("total").textContent = total;
+    document.getElementById("totalVenta").textContent = totalVenta;
     document.getElementById("efectivo").textContent = efectivo;
-    document.getElementById("devueltas").textContent = devueltas;
+    document.getElementById("devuelta").textContent = devuelta;
     document.getElementById("estado").textContent = estado;
 
     const tablaBody = document.getElementById("tablaBody");
@@ -140,7 +145,7 @@ function renderTicket() {
             newRow.innerHTML = `
                 <td>${row.cantidad}</td>
                 <td>${row.descripcion}</td>
-                <td>${row.precio_unit}</td>
+                <td>$${row.total}</td>
             `;
             tablaBody.appendChild(newRow);
         }
@@ -151,28 +156,26 @@ function renderTicket() {
 <div id="thermal-pos">
 
 <div class="label">
-
 <img src="logo.svg" class="logo" alt="Logo">
 
-<p class="info-tienda">
-Nit:
+<p>
+NIT:
 <br>
-Domicilios 304 4430427
+Domicilios: +502 4932 0669
 <br>
-Mistares Etapa 2 Frente Bourboun
+Local #17 Terminal de buses,
+Guastatoya El progreso, Guatemala
 </p>
 </div>
 
 <div class="label">
-<b>TICKET:</b>
-<h1 id="nro_boleta_id">---</h1>
-<h1 id="nro_mesa_id"></h1>
-<h3 id="nro_direccion_id"></h3>
+<b>VENTA:</b>
+<h1 id="ticket_id">---</h1>
 </div>
 
 <div class="label">
-<p class="fecha_recepcion">
-FECHA DE RECEPCIÓN:
+<p>
+FECHA DE VENTA:
 <br>
 <b id="fechaR"></b>
 <b id="hora"></b>
@@ -198,30 +201,46 @@ FECHA DE RECEPCIÓN:
 
 <tr class="table-footer">
 <td colspan="2"><h2>TOTAL:</h2></td>
-<td><h2 id="total">0</h2></td>
+<td><h2 id="totalVenta">0</h2></td>
 </tr>
 
 <tr class="table-footer">
-<td colspan="2"><h2>DEVUELTAS:</h2></td>
-<td><h2 id="devueltas">0</h2></td>
+<td colspan="2"><h2>DEVUELTA:</h2></td>
+<td><h2 id="devuelta">0</h2></td>
 </tr>
 </tfoot>
 </table>
 
-<br>
-
 <p class="saldo-text">
-<b><span id="estado">--</span></b>
+<b><span id="estado">PAGADO</span></b>
 </p>
 
 <div class="policy">
 <p><b>IMPORTANTE:</b></p>
+
 <p class="m-0">
-Facturas AutoSystem
+Facturas SixCompany
 <br>
-Contacto: +57 315 820 8619
+Contacto: +502 4932 0669
 <br>
-Síguenos como @AutoSystem
+Síguenos como
+<br>
+Instagram
+<br>
+@misterphoneguastatoya
+<br>
+Facebook
+<br>
+Mister Phone
+<br>
+TikTok
+<br>
+@misterphoneguastatoya
+</p>
+
+<p class="garantia">
+Conserve este ticket para el reconocimiento de garantía en productos.  
+La garantía aplica por un período de <b>3 días</b>.
 </p>
 </div>
 
