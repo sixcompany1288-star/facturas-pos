@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ticket</title>
+
+<style>
+body{
+    font-family: 'Courier New', monospace;
+    width:58mm;
+    margin:auto;
+    padding:8px;
+    background:white;
+    color:black;
+    font-size:12px;
+}
+
+.logo{
+    text-align:center;
+}
+
+.logo img{
+    width:80px;
+    filter: grayscale(100%);
+}
+
+h1,h2,p{
+    margin:2px 0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:2px 0;
+    font-size:11px;
+}
+
+.right{
+    text-align:right;
+}
+
+.center{
+    text-align:center;
+}
+
+hr{
+    border:none;
+    border-top:1px dashed black;
+}
+
+button{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+}
+
+@media print{
+    button{
+        display:none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="logo">
+    <img src="logo.svg">
+</div>
+
+<h2 class="center">Mister Phone</h2>
+<p class="center">Domicilios 3044430427</p>
+<p class="center">Mistares Etapa 2</p>
+
+<hr>
+
+<p id="venta"></p>
+<p id="cliente"></p>
+<p id="fecha"></p>
+
+<hr>
+
+<table>
+    <thead>
+        <tr>
+            <th>Cant</th>
+            <th>Descripción</th>
+            <th class="right">Total</th>
+        </tr>
+    </thead>
+    <tbody id="items"></tbody>
+</table>
+
+<hr>
+
+<table>
+<tr>
+<td>Subtotal</td>
+<td class="right" id="subtotal"></td>
+</tr>
+
+<tr>
+<td>Descuento</td>
+<td class="right" id="descuento"></td>
+</tr>
+
+<tr>
+<td>Total</td>
+<td class="right" id="total"></td>
+</tr>
+
+<tr>
+<td>Recibido</td>
+<td class="right" id="recibido"></td>
+</tr>
+
+<tr>
+<td>Devuelta</td>
+<td class="right" id="devuelta"></td>
+</tr>
+</table>
+
+<hr>
+
+<p class="center">Gracias por su compra</p>
+<p class="center">Facturas AutoSystem</p>
+
+<button onclick="window.print()">Imprimir</button>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+
+document.getElementById("venta").innerText =
+"Venta: " + params.get("idVenta");
+
+document.getElementById("cliente").innerText =
+"Cliente: " + params.get("cliente");
+
+document.getElementById("fecha").innerText =
+"Fecha: " + params.get("fecha");
+
+document.getElementById("subtotal").innerText =
+params.get("subtotal");
+
+document.getElementById("descuento").innerText =
+params.get("descuento");
+
+document.getElementById("total").innerText =
+params.get("total");
+
+document.getElementById("recibido").innerText =
+params.get("recibido");
+
+document.getElementById("devuelta").innerText =
+params.get("devuelta");
+
+const productos = params.get("productos").split(",");
+const cantidades = params.get("cantidades").split(",");
+const precios = params.get("precios").split(",");
+
+let filas = "";
+
+for(let i=0;i<productos.length;i++){
+    filas += `
+    <tr>
+        <td>${cantidades[i]}</td>
+        <td>${productos[i]}</td>
+        <td class="right">${precios[i]}</td>
+    </tr>`;
+}
+
+document.getElementById("items").innerHTML = filas;
+
+</script>
+
+</body>
+</html>
