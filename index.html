@@ -97,7 +97,8 @@ function getValue(key, def = "") {
 }
 
 function formatNumber(value) {
-    const num = parseFloat(value || 0);
+    const limpio = String(value).replace(/[^\d.-]/g, '');
+    const num = parseFloat(limpio || 0);
     return isNaN(num) ? "0" : num.toLocaleString('es-CO');
 }
 
@@ -116,7 +117,7 @@ const devuelta = formatNumber(getValue('devuelta', 0));
 const estado = getValue('estado', "PAGADO");
 
 let cantidades = getValue('cantidades', "0").split(",");
-let productos = getValue('nombreProducto', "Sin artículos").split(",");
+let productos = getValue('productos', "Sin artículos").split(",");
 let totales = getValue('totales', "0").split(",");
 
 let result = cantidades.map((c, i) => ({
