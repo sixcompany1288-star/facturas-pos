@@ -113,6 +113,7 @@ const cliente = getValue('clienteID', "NA");
 
 const totalVenta = formatNumber(getValue('totalVenta', 0));
 const efectivo = formatNumber(getValue('dineroRecibido', 0));
+const descuento = formatNumber(getValue('descuento', 0));
 const devuelta = formatNumber(getValue('devuelta', 0));
 const estado = getValue('estado', "PAGADO");
 
@@ -141,6 +142,7 @@ function renderTicket() {
     document.getElementById("hora").textContent = hora;
     document.getElementById("totalVenta").textContent = totalVenta;
     document.getElementById("efectivo").textContent = efectivo;
+    document.getElementById("descuento").textContent = descuento;
     document.getElementById("devuelta").textContent = devuelta;
     document.getElementById("estado").textContent = estado;
 
@@ -209,6 +211,11 @@ FECHA DE VENTA:
 <tr class="table-footer">
 <td colspan="2"><h2>EFECTIVO:</h2></td>
 <td><h2 id="efectivo">0</h2></td>
+</tr>
+
+<tr class="table-footer">
+<td colspan="2"><h2>DESCUENTO:</h2></td>
+<td><h2 id="descuento">0</h2></td>
 </tr>
 
 <tr class="table-footer">
