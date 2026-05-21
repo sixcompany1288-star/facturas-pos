@@ -99,7 +99,11 @@ function getValue(key, def = "") {
 }
 
 function formatNumber(value) {
-    const num = Number(value);
+
+    const limpio = String(value)
+        .replace(/[^\d.-]/g, '');
+
+    const num = Number(limpio);
 
     return isNaN(num)
         ? "0"
